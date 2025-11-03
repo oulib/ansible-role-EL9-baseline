@@ -16,12 +16,14 @@
     name:
       - epel-release
       - epel-next-release
+    state: latest
   become: true
 
 - name: Install basic tools
   ansible.builtin.dnf:
     name:
       - vim
+      - nano
       - tree
       - htop
       - ack
@@ -38,11 +40,18 @@
     state: present
   become: true
 
-
-
 - name: Set ec2 hostname based on tag
   ansible.builtin.hostname:
     name: "{{ tags.Name }}"
     use: systemd
   become: true
   when: ( tags.Name is defined) and (tags.Name|length > 0)
+
+- name:  Allow passwordless sudo for wheel group
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL)  NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+  become: true
