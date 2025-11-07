@@ -22,14 +22,17 @@
 - name: Install basic tools
   ansible.builtin.dnf:
     name:
-      - vim
-      - nano
-      - tree
-      - htop
       - ack
+      - bind-utils
       - curl
-      - wget
+      - git
+      - htop
+      - nano
+      - policycoreutils-python-utils
       - tmux
+      - tree
+      - vim
+      - wget
     state: present
   become: true
 
