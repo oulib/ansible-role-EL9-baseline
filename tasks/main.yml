@@ -2,33 +2,37 @@
 # tasks file for OULibOps.EL9-baseline
 
 
-# Ensure that EPEL is enabled
+- name: Check for CRB.
+  ansible.builtin.command:
+    cmd: dnf repolist
+  register: dnf_repolist
+  changed_when: false
 
-# sudo dnf config-manager --set-enabled crb
-- name: Ensure the crb repository is enabled
-  ansible.builtin.shell:
+- name: Ensure the CRB repository is enabled.
+  ansible.builtin.command:
     cmd: dnf config-manager --set-enabled crb  -y
+    creates:
   become: true
+  when: dnf_repolist.stdout.find("crb") == -1
 
-# sudo dnf install epel-release epel-next-release
-- name: Make sure EPEL is enabled
+- name: Ensure that EPEL is enabled.
   ansible.builtin.dnf:
     name:
       - epel-release
       - epel-next-release
-    state: latest
+    state: present
   become: true
 
-- name: Install basic tools
+- name: Install basic sysadmin tools.
   ansible.builtin.dnf:
     name:
       - ack
-      - bind-utils
+      - bind-utils  # includes dig
       - curl
       - git
       - htop
       - nano
-      - policycoreutils-python-utils
+      - policycoreutils-python-utils # includes audit2why
       - tmux
       - tree
       - vim
@@ -36,21 +40,21 @@
     state: present
   become: true
 
-- name: Install AWS tools
+- name: Install AWS tools.
   ansible.builtin.dnf:
     name:
       - awscli2
     state: present
   become: true
 
-- name: Set ec2 hostname based on tag
+- name: Set hostname based on Name tag (if present).
   ansible.builtin.hostname:
     name: "{{ tags.Name }}"
     use: systemd
   become: true
   when: ( tags.Name is defined) and (tags.Name|length > 0)
 
-- name:  Allow passwordless sudo for wheel group
+- name: Allow passwordless sudo for wheel group.
   ansible.builtin.lineinfile:
     path: /etc/sudoers
     state: present
