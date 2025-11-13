@@ -1,8 +1,7 @@
 ---
 # tasks file for OULibOps.EL9-baseline
 
-
-- name: Check for CRB.
+- name: Check for CRB repos.
   ansible.builtin.command:
     cmd: dnf repolist
   register: dnf_repolist
@@ -30,7 +29,6 @@
       - bind-utils  # includes dig
       - curl
       - git
-      - htop
       - nano
       - policycoreutils-python-utils # includes audit2why
       - tmux
@@ -38,6 +36,15 @@
       - vim
       - wget
     state: present
+  become: true
+
+- name: Install useful performance monitoring tools.
+  ansible.builtin.dnf:
+    name:
+      - htop
+      - iotop
+      - nload
+   state: present
   become: true
 
 - name: Install AWS tools.
@@ -62,3 +69,8 @@
     line: '%wheel ALL=(ALL)  NOPASSWD: ALL'
     validate: 'visudo -cf %s'
   become: true
+
+- name: Set timezone to America/Chicago
+  become: true
+  community.general.timezone:
+    name: America/Chicago
