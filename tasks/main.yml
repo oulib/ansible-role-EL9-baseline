@@ -18,9 +18,17 @@
   ansible.builtin.dnf:
     name:
       - epel-release
-      - epel-next-release
     state: present
   become: true
+
+- name: Enable EPEL Next for CentOS Stream
+  ansible.builtin.dnf:
+    name: "epel-next-release"
+    state: present
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_release == "Stream"
 
 - name: Install basic sysadmin tools.
   ansible.builtin.dnf:
@@ -44,7 +52,7 @@
       - htop
       - iotop
       - nload
-   state: present
+    state: present
   become: true
 
 - name: Install AWS tools.
